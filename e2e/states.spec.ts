@@ -1,6 +1,32 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test("keyboard skip link focuses content without changing the active screen", async ({
+  page,
+}) => {
+  for (const path of [
+    "nearby",
+    "search",
+    "saved",
+    "insights",
+    "stop/1000",
+    "route/1",
+  ]) {
+    await page.goto(`./#/${path}`);
+    await expect(page.locator(".loading")).toHaveCount(0);
+    const url = page.url();
+    const heading = await page.getByRole("heading", { level: 1 }).textContent();
+    await page.getByRole("link", { name: "Skip to content" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("main")).toBeFocused();
+    await expect(page).toHaveURL(url);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading!);
+    await expect(
+      page.getByRole("heading", { name: "Page not found" }),
+    ).toHaveCount(0);
+  }
+});
+
 test("top-level screens have accessible landmarks and empty states", async ({
   page,
 }) => {

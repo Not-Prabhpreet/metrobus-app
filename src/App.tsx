@@ -197,7 +197,14 @@ export function App() {
   const showTop = !["stop", "route"].includes(page);
   return (
     <>
-      <a href="#main-content" className="skip-link">
+      <a
+        href="#main-content"
+        className="skip-link"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("main-content")?.focus();
+        }}
+      >
         Skip to content
       </a>
       {showTop && (
@@ -230,6 +237,7 @@ export function App() {
       )}
       <main
         id="main-content"
+        tabIndex={-1}
         className={page === "insights" ? "insights-main" : "rider-main"}
       >
         {offline && (
