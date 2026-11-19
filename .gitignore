@@ -1,0 +1,29 @@
+# Local design brief
+/Metrobus-Next-Codex-Brief.pdf
+/.pdf-review/
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+*.log
+*.tsbuildinfo
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+*.pem
+*.key
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
