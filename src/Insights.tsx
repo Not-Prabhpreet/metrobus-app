@@ -467,7 +467,12 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
       (Date.parse(meta.end) - Date.parse(localDate(now, meta.timezone))) /
         86400000,
     );
-  const checks = [
+  const checks: {
+    title: string;
+    pass: boolean;
+    text: string;
+    unusedIds?: string[];
+  }[] = [
     {
       title: "Required files are present",
       pass: true,
@@ -486,11 +491,19 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
       text: `Feed ends ${formatDate(meta.end)}, ${days >= 0 ? `in ${days} days` : `${Math.abs(days)} days ago`}`,
     },
     {
-      title: "Stop names are unique",
-      pass: meta.duplicateNames === 0,
-      text: meta.duplicateNames
-        ? `${meta.duplicateNames} stops share a name with another stop code`
-        : "Each stop has a unique name",
+      title: "Every stop is used by at least one trip",
+      pass: meta.unusedStopCount === 0,
+      text: meta.unusedStopCount
+        ? `${meta.unusedStopCount} unused stops`
+        : "All stops occur in at least one trip. No unused stop IDs.",
+      unusedIds: meta.unusedStopIds,
+    },
+    {
+      title: "Stop times increase within each trip",
+      pass: meta.stopTimeOrderViolationCount === 0,
+      text: meta.stopTimeOrderViolationCount
+        ? `${meta.stopTimeOrderViolationCount} time-order violations`
+        : "All trips have non-decreasing arrival/departure times. Equal times are allowed.",
     },
   ];
   const passed = checks.filter((c) => c.pass).length;
@@ -498,9 +511,9 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
     <section className="card side-panel">
       <h2>Data quality</h2>
       <p>
-        {passed} of 4 checks pass
-        {passed < 4
-          ? `; ${4 - passed} ${passed === 3 ? "needs" : "need"} a look before the next feed.`
+        {passed} of {checks.length} checks pass
+        {passed < checks.length
+          ? `; ${checks.length - passed} ${checks.length - passed === 1 ? "needs" : "need"} a look before the next feed.`
           : "."}
       </p>
       <ul className="quality-list">
@@ -509,6 +522,18 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
             <div>
               <strong>{check.title}</strong>
               <p className="caption">{check.text}</p>
+              {!!check.unusedIds?.length && (
+                <details className="unused-stops">
+                  <summary>Unused stop IDs ({check.unusedIds.length})</summary>
+                  <ul>
+                    {check.unusedIds.map((id) => (
+                      <li key={id}>
+                        <a href={`#/stop/${id}`}>{id}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </div>
             <StatusChip pass={check.pass} />
           </li>

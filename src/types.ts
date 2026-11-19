@@ -54,7 +54,9 @@ export type Schedule = {
     retrieved: string;
     sha256: string;
     outside: number;
-    duplicateNames: number;
+    unusedStopCount: number;
+    unusedStopIds: string[];
+    stopTimeOrderViolationCount: number;
     maxTime: number;
     chartAfterMidnight: string;
   };

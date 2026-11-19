@@ -20,6 +20,7 @@ import {
 } from "../src/lib/time.mjs";
 import { metricsFor } from "../src/lib/metrics.mjs";
 import { boardingDepartures } from "./lib/boarding.mjs";
+import { evaluateQuality } from "./lib/quality.mjs";
 
 const source = "https://www.metrobustransit.ca/google/google_transit.zip";
 const root = new URL("../", import.meta.url);
@@ -133,6 +134,7 @@ try {
       },
     ]),
   );
+  const qualityStopTimes = [];
   for (const row of csv("stop_times", [
     "trip_id",
     "stop_id",
@@ -144,14 +146,22 @@ try {
       throw new Error(`stop_times.txt references unknown trip ${row.trip_id}`);
     if (!stops[row.stop_id])
       throw new Error(`stop_times.txt references unknown stop ${row.stop_id}`);
-    let time;
+    let time, arrival;
     try {
       time = parseTime(row.departure_time || row.arrival_time);
+      arrival = parseTime(row.arrival_time || row.departure_time);
     } catch (e) {
       throw new Error(
         `Malformed stop_times.txt, trip ${trip.id}: ${e.message}`,
       );
     }
+    qualityStopTimes.push({
+      trip: trip.id,
+      stop: row.stop_id,
+      sequence: Number(row.stop_sequence),
+      arrival,
+      departure: time,
+    });
     trip.stops.push({
       id: row.stop_id,
       time,
@@ -169,9 +179,17 @@ try {
       throw new Error(`trips.txt: unknown route ${t.route}`);
     t.stops.sort((a, b) => a.sequence - b.sequence);
     t.first = t.stops[0].time;
-    for (let i = 1; i < t.stops.length; i++)
-      if (t.stops[i].time < t.stops[i - 1].time)
-        throw new Error(`stop_times.txt: times go backwards in trip ${t.id}`);
+  }
+  const quality = evaluateQuality(
+    Object.keys(stops),
+    Object.keys(trips),
+    qualityStopTimes,
+  );
+  if (quality.stopTimeOrderViolationCount) {
+    const violation = quality.stopTimeOrderViolations[0];
+    throw new Error(
+      `stop_times.txt: SQL time-order check failed in trip ${violation.trip_id}, sequence ${violation.stop_sequence} (${quality.stopTimeOrderViolationCount} violations)`,
+    );
   }
   const departures = boardingDepartures(trips, Object.keys(stops));
   const shapePoints = {};
@@ -234,9 +252,6 @@ try {
       ),
     };
   }
-  const names = new Map();
-  for (const s of Object.values(stops))
-    names.set(s.name, (names.get(s.name) || 0) + 1);
   const outside = Object.values(stops).filter(
     (s) =>
       !Number.isFinite(s.lat) ||
@@ -245,9 +260,6 @@ try {
       s.lat > bounds.north ||
       s.lon < bounds.west ||
       s.lon > bounds.east,
-  ).length;
-  const duplicateNames = Object.values(stops).filter(
-    (s) => names.get(s.name) > 1,
   ).length;
   const hash = createHash("sha256").update(bytes).digest("hex");
   let retrieved;
@@ -267,7 +279,7 @@ try {
     sha256: hash,
     bounds,
     outside,
-    duplicateNames,
+    ...quality,
     maxTime: Math.max(
       ...Object.values(trips).flatMap((t) => t.stops.map((s) => s.time)),
     ),
