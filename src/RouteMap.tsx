@@ -31,6 +31,7 @@ export function RouteMap({
         attributionControl: true,
       });
       map.attributionControl.setPrefix(false);
+      map.attributionControl.setPosition("topright");
       const shape = points
         .filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]))
         .map((p) => L.latLng(p[0], p[1]));

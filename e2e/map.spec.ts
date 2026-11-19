@@ -17,6 +17,9 @@ test("Leaflet shows the route, stop markers and visible OpenStreetMap attributio
       .locator(".leaflet-control-attribution")
       .getByRole("link", { name: "OpenStreetMap" }),
   ).toBeVisible();
+  await expect(
+    page.locator(".leaflet-top.leaflet-right .leaflet-control-attribution"),
+  ).toBeVisible();
   await expect
     .poll(() => page.locator(".leaflet-marker-icon").count())
     .toBeGreaterThan(1);
