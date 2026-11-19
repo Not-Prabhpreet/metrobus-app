@@ -158,7 +158,17 @@ export function App() {
         worker.postMessage("SCHEDULE_SAVED", [channel.port2]);
       }
     };
+    let hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
     const updateSchedule = () => {
+      if (hadController) {
+        if (!reloading) {
+          reloading = true;
+          window.location.reload();
+        }
+        return;
+      }
+      hadController = true;
       setAttempt((value) => value + 1);
       readCacheDate(navigator.serviceWorker.controller);
     };
@@ -166,22 +176,45 @@ export function App() {
       "controllerchange",
       updateSchedule,
     );
+    let registration: ServiceWorkerRegistration | undefined;
+    const checkForUpdate = () => {
+      if (
+        registration &&
+        navigator.onLine &&
+        document.visibilityState === "visible"
+      ) {
+        registration.update().catch(() => {});
+      }
+    };
+    const updateTimer = window.setInterval(checkForUpdate, 5 * 60 * 1000);
+    window.addEventListener("focus", checkForUpdate);
+    window.addEventListener("online", checkForUpdate);
+    document.addEventListener("visibilitychange", checkForUpdate);
     navigator.serviceWorker
       .register(`${import.meta.env.BASE_URL}sw.js`, {
         scope: import.meta.env.BASE_URL,
+        updateViaCache: "none",
       })
-      .then(() => navigator.serviceWorker.ready)
+      .then((value) => {
+        registration = value;
+        return navigator.serviceWorker.ready;
+      })
       .then((registration) => readCacheDate(registration.active))
       .catch(() =>
         setStorageMessage(
           "Offline saving is unavailable in this browser. You can still use the schedule while connected.",
         ),
       );
-    return () =>
+    return () => {
+      window.clearInterval(updateTimer);
+      window.removeEventListener("focus", checkForUpdate);
+      window.removeEventListener("online", checkForUpdate);
+      document.removeEventListener("visibilitychange", checkForUpdate);
       navigator.serviceWorker.removeEventListener(
         "controllerchange",
         updateSchedule,
       );
+    };
   }, []);
   function toggleSaved(stopId: string) {
     setSaved((prev) => {
