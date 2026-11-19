@@ -6,6 +6,8 @@ Data used in this product or service is provided by Metrobus Transit, however Me
 
 Run `npm run data:refresh` at least weekly to replace the retained source ZIP and rebuild all derived JSON. `data/source.json` records its SHA-256 and retrieval time. Builds validate required files, columns, references and time ordering, and fail before replacing output on malformed input. Generated JSON is excluded from Git; the source ZIP is retained so clean checkouts can build without a network download.
 
+The Pages workflow runs this refresh automatically every Monday at 09:17 UTC and before each source/manual deployment. It archives the exact downloaded ZIP and source record for 90 days, then publishes only after unit and multi-browser tests pass. A failed run leaves the last successful public deployment available. Explicit downloads advance the retrieval timestamp even when the feed contents are unchanged; ordinary local builds retain that timestamp.
+
 ## Service days
 
 The client uses the feed's agency timezone, `America/St_Johns`. GTFS times use service-date local noon minus twelve elapsed hours. Hours above 24 remain attached to their original service day, and calendar exceptions override weekly service. The departure search examines earlier service days using the maximum time in the feed, plus the following seven days. It does not invent departures beyond the feed's calendar.

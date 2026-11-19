@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   ChevronDown,
   ChevronLeft,
@@ -42,14 +48,15 @@ function readSaved(): string[] {
     return [];
   }
 }
+function subscribeToLocation(update: () => void) {
+  window.addEventListener("hashchange", update);
+  return () => window.removeEventListener("hashchange", update);
+}
 function useLocation() {
-  const [hash, setHash] = useState(location.hash || "#/nearby");
-  useEffect(() => {
-    const update = () => setHash(location.hash || "#/nearby");
-    window.addEventListener("hashchange", update);
-    return () => window.removeEventListener("hashchange", update);
-  }, []);
-  return hash;
+  return useSyncExternalStore(
+    subscribeToLocation,
+    () => location.hash || "#/nearby",
+  );
 }
 export function App() {
   const [data, setData] = useState<Schedule | null>(null),
@@ -118,7 +125,7 @@ export function App() {
       localStorage.setItem("metrobus-theme", theme);
     } catch {}
   }, [theme]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
     const titles: Record<string, string> = {
       nearby: "Find your stop",
@@ -129,18 +136,12 @@ export function App() {
       route: "Route details",
     };
     document.title = `${titles[page] || "Page not found"} · Metrobus Next`;
-    requestAnimationFrame(() =>
-      document.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true }),
-    );
+    document.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
   }, [hash, !!data]);
   useEffect(() => {
     if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
-    navigator.serviceWorker
-      .register(`${import.meta.env.BASE_URL}sw.js`, {
-        scope: import.meta.env.BASE_URL,
-      })
-      .then(() => navigator.serviceWorker.ready)
-      .then((registration) => {
+    const readCacheDate = (worker: ServiceWorker | null) => {
+      if (worker) {
         const channel = new MessageChannel();
         channel.port1.onmessage = (event) => {
           const date = event.data;
@@ -152,12 +153,32 @@ export function App() {
           }
           channel.port1.close();
         };
-        registration.active?.postMessage("SCHEDULE_SAVED", [channel.port2]);
+        worker.postMessage("SCHEDULE_SAVED", [channel.port2]);
+      }
+    };
+    const updateSchedule = () => {
+      setAttempt((value) => value + 1);
+      readCacheDate(navigator.serviceWorker.controller);
+    };
+    navigator.serviceWorker.addEventListener(
+      "controllerchange",
+      updateSchedule,
+    );
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`, {
+        scope: import.meta.env.BASE_URL,
       })
+      .then(() => navigator.serviceWorker.ready)
+      .then((registration) => readCacheDate(registration.active))
       .catch(() =>
         setStorageMessage(
           "Offline saving is unavailable in this browser. You can still use the schedule while connected.",
         ),
+      );
+    return () =>
+      navigator.serviceWorker.removeEventListener(
+        "controllerchange",
+        updateSchedule,
       );
   }, []);
   function toggleSaved(stopId: string) {

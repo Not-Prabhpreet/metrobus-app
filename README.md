@@ -36,7 +36,7 @@ npm run build
 npm run test:e2e
 ```
 
-Browser checks use installed Google Chrome locally. CI installs Playwright Chromium. They cover rider flows, day toggles and sorting, accessibility scans, offline reload, dark mode, and narrow-screen reflow. Unit tests cover GTFS service-day arithmetic, Newfoundland daylight saving changes, calendar exceptions, and service metrics.
+Browser checks cover desktop Chromium, Android-style Chromium, and iPhone-style WebKit. Locally, install WebKit with `npx playwright install webkit`; CI installs both browser engines automatically. These are browser/device emulations, not tests on physical phones. The checks cover rider flows, keyboard navigation, day toggles and sorting, accessibility scans, offline reload, dark mode, and narrow-screen reflow. Unit tests cover GTFS service-day arithmetic, Newfoundland daylight saving changes, calendar exceptions, and service metrics.
 
 ## Update the schedule
 
@@ -44,7 +44,9 @@ Browser checks use installed Google Chrome locally. CI installs Playwright Chrom
 npm run data:refresh
 ```
 
-Refresh at least weekly, as required by the data provider. Commit `data/google_transit.zip` and `data/source.json`, then rebuild and redeploy. A normal build uses the retained ZIP, so it is reproducible without downloading a new feed. A failed validation stops the build before replacing derived output. See [data sources and metric definitions](docs/DATA.md).
+GitHub Pages now downloads and validates the official feed on every deployment and automatically every Monday at 09:17 UTC. It runs all tests before publishing; a failed download or check leaves the current site in place. Each successful build retains the exact source ZIP and its timestamp/SHA-256 record as a workflow artifact for 90 days. No bot commits or additional secrets are needed.
+
+For a manual refresh, run the command above, commit `data/google_transit.zip` and `data/source.json`, and redeploy. A normal local build uses the retained ZIP, so it is reproducible without downloading a new feed. A failed validation stops the build before replacing derived output. See [data sources and metric definitions](docs/DATA.md). GitHub can pause scheduled workflows after prolonged repository inactivity; the workflow also has a manual Run button.
 
 ## Stack and layout
 
@@ -63,9 +65,15 @@ Installability and storage availability depend on the browser. The app reports u
 
 ## GitHub Pages deployment
 
-Changes merged into `main` run the Pages workflow: unit tests, a production build using `VITE_BASE_PATH=/metrobus-app/`, browser checks at that same path, and deployment of `dist/`. The workflow can also be run manually through GitHub Actions. The app uses hash routes, so stop and route links work without server rewrite rules.
+Changes merged into `main` run the Pages workflow: latest-feed download, unit tests, a production build using `VITE_BASE_PATH=/metrobus-app/`, browser checks at that same path in all three browser configurations, and deployment of `dist/`. Weekly and manual runs use the same pipeline. The app uses hash routes, so stop and route links work without server rewrite rules.
 
 The manifest, fonts, schedule fetch and scoped service worker support the repository subdirectory. Local development defaults to `/`. To test the Pages build locally, set `VITE_BASE_PATH=/metrobus-app/` for both `npm run build` and `npm run test:e2e`.
+
+Offline cache versions include the complete generated schedule, so a data-only refresh creates a new cache. Open clients reload their schedule data when a new worker takes control.
+
+## Final phone acceptance check
+
+On an actual iPhone and Android phone: open the public app, allow location, save a stop, add/install it to the home screen, close it, switch to airplane mode, and reopen the saved stop. Automated browser emulation verifies the software flows; physical permission prompts, home-screen installation, and operating-system storage behavior need this device check.
 
 ## Development workflow
 

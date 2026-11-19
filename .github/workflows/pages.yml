@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # Monday, 09:17 UTC. Refresh and redeploy even when app source is unchanged.
+    - cron: "17 9 * * 1"
 
 permissions:
   contents: read
@@ -25,10 +28,20 @@ jobs:
           cache: npm
       - uses: actions/configure-pages@v5
       - run: npm ci
+      - name: Download and validate the latest official schedule
+        run: npm run data:refresh
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
+      - name: Retain the exact feed used for this deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: schedule-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            data/google_transit.zip
+            data/source.json
+          retention-days: 90
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist

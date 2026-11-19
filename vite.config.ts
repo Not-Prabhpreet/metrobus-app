@@ -15,7 +15,9 @@ export default defineConfig({
         basePath = config.base;
       },
       generateBundle(_, bundle) {
-        const meta = JSON.parse(readFileSync("data/source.json", "utf8"));
+        const scheduleHash = createHash("sha256")
+          .update(readFileSync("public/data/schedule.json"))
+          .digest("hex");
         const files = [
           "",
           "index.html",
@@ -28,7 +30,7 @@ export default defineConfig({
         ].map((file) => basePath + file);
         const template = readFileSync("scripts/sw-template.js", "utf8");
         const version = createHash("sha256")
-          .update(meta.sha256 + JSON.stringify(files) + template)
+          .update(scheduleHash + JSON.stringify(files) + template)
           .digest("hex")
           .slice(0, 16);
         const source = template
