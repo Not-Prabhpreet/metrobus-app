@@ -9,4 +9,4 @@
 
 ## Current stage
 
-The owner is providing requests before implementation. Wait for the owner to authorize starting the build.
+The owner authorized implementation on November 19, 2026. Follow the local PDF brief and the branch workflow above.

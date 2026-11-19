@@ -4,6 +4,12 @@
 
 # Dependencies and generated output
 node_modules/
+.npm-cache/
+test-results/
+playwright-report/
+/.site-publish/
+/public/data/
+/public/data-next/
 dist/
 build/
 .next/
