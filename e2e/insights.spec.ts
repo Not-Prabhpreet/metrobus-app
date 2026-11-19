@@ -6,7 +6,7 @@ test("dashboard recomputes each day, preserves sort, and shows every route", asy
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1024 });
-  await page.goto("/#/insights");
+  await page.goto("./#/insights");
   await expect(
     page.getByRole("heading", { name: "Service insights", exact: true }),
   ).toBeVisible();
@@ -53,7 +53,7 @@ test("dashboard recomputes each day, preserves sort, and shows every route", asy
 test("mobile cards, dark mode, narrow reflow and large text remain accessible", async ({
   page,
 }) => {
-  await page.goto("/#/insights");
+  await page.goto("./#/insights");
   await expect(page.locator(".route-metric-card")).toHaveCount(4);
   await page.getByLabel("Sort by", { exact: true }).selectOption("number-asc");
   await expect(page.locator(".route-metric-card").first()).toContainText(

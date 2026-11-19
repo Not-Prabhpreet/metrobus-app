@@ -85,7 +85,7 @@ export function App() {
   useEffect(() => {
     let cancelled = false;
     setError(false);
-    fetch("/data/schedule.json")
+    fetch(`${import.meta.env.BASE_URL}data/schedule.json`)
       .then((r) => {
         if (!r.ok) throw Error("Schedule unavailable");
         return r.json();
@@ -136,7 +136,9 @@ export function App() {
   useEffect(() => {
     if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
     navigator.serviceWorker
-      .register("/sw.js")
+      .register(`${import.meta.env.BASE_URL}sw.js`, {
+        scope: import.meta.env.BASE_URL,
+      })
       .then(() => navigator.serviceWorker.ready)
       .then((registration) => {
         const channel = new MessageChannel();

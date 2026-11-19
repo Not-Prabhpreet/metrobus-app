@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
 test("search, save, timetable, route and device persistence", async ({
   page,
 }) => {
-  await page.goto("/#/search");
+  await page.goto("./#/search");
   await page.getByRole("searchbox").fill(stop.code);
   const link = page
     .locator(".stop-link")
@@ -64,7 +64,7 @@ test("search, save, timetable, route and device persistence", async ({
     ).violations,
   ).toEqual([]);
   await page.reload();
-  await page.goto("/#/saved");
+  await page.goto("./#/saved");
   await expect(page.locator(".saved-card")).toHaveCount(1);
 });
 test("nearby geolocation is local and denied/no-results states are usable", async ({
@@ -75,7 +75,7 @@ test("nearby geolocation is local and denied/no-results states are usable", asyn
   await context.setGeolocation({ latitude: stop.lat, longitude: stop.lon });
   const requests: string[] = [];
   page.on("request", (r) => requests.push(r.url()));
-  await page.goto("/");
+  await page.goto("./");
   await page.getByRole("button", { name: "Use my location" }).click();
   await expect(page.locator(".stop-row")).toHaveCount(5);
   await page.screenshot({
@@ -92,7 +92,7 @@ test("installed schedule and app shell reload without network", async ({
   page,
   context,
 }) => {
-  await page.goto(`/#/stop/${stop.id}`);
+  await page.goto(`./#/stop/${stop.id}`);
   await expect(page.locator(".departure-hero")).toBeVisible();
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
