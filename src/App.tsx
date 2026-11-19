@@ -38,6 +38,7 @@ import {
 } from "./lib/time.mjs";
 import type { Departure, Schedule, Stop, Trip } from "./types";
 import { Insights } from "./Insights";
+import { RouteMap } from "./RouteMap";
 
 type Position = { lat: number; lon: number };
 function readSaved(): string[] {
@@ -961,74 +962,5 @@ function RouteDetail({ id, ...props }: Shared & { id: string }) {
         </>
       )}
     </>
-  );
-}
-function RouteMap({
-  points,
-  trip,
-  data,
-  nearest,
-}: {
-  points: number[][];
-  trip: Trip;
-  data: Schedule;
-  nearest: string | null;
-}) {
-  const lats = points.map((p) => p[0]),
-    lons = points.map((p) => p[1]),
-    minLat = Math.min(...lats),
-    maxLat = Math.max(...lats),
-    minLon = Math.min(...lons),
-    maxLon = Math.max(...lons);
-  const xy = (lat: number, lon: number) => [
-    28 + ((lon - minLon) / (maxLon - minLon || 1)) * 544,
-    272 - ((lat - minLat) / (maxLat - minLat || 1)) * 244,
-  ];
-  return (
-    <svg
-      className="route-map"
-      role="img"
-      aria-label={`Route ${data.routes.find((r) => r.id === trip.route)?.number} map preview. ${trip.stops.length} stops, all listed below${nearest ? `, nearest stop ${data.stops[nearest].name}` : ""}.`}
-      viewBox="0 0 600 300"
-    >
-      <defs>
-        <pattern
-          id="map-grid"
-          width="60"
-          height="60"
-          patternUnits="userSpaceOnUse"
-        >
-          <path
-            d="M 60 0 L 0 0 0 60"
-            fill="none"
-            stroke="var(--line)"
-            strokeWidth="1"
-          />
-        </pattern>
-      </defs>
-      <rect width="600" height="300" fill="var(--map)" />
-      <rect width="600" height="300" fill="url(#map-grid)" />
-      <polyline
-        points={points.map((p) => xy(p[0], p[1]).join(",")).join(" ")}
-        fill="none"
-        stroke="var(--accent)"
-        strokeWidth="5"
-        strokeLinejoin="round"
-      />
-      {trip.stops.map((s, i) => {
-        const [x, y] = xy(data.stops[s.id].lat, data.stops[s.id].lon);
-        return (
-          <circle
-            key={`${s.id}-${i}`}
-            cx={x}
-            cy={y}
-            r={nearest === s.id ? 9 : 4}
-            fill="var(--surface)"
-            stroke={nearest === s.id ? "var(--ink)" : "var(--accent)"}
-            strokeWidth={nearest === s.id ? 4 : 2}
-          />
-        );
-      })}
-    </svg>
   );
 }
