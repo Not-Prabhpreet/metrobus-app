@@ -1,12 +1,62 @@
 # Metrobus Next
 
-A planned mobile-first rider app and service planning dashboard for Metrobus in St. John's, Newfoundland and Labrador, using public GTFS schedule data.
+A mobile-first rider app and service planning dashboard for Metrobus in St. John's, Newfoundland and Labrador, using public GTFS schedule data.
 
 ## Project status
 
-Implementation has not started and is waiting for the owner's remaining requirements.
+The first implementation includes stop search, on-device nearby stops, saved stops, scheduled departure countdowns, full timetables, route directions and shape previews, offline PWA caching, dark mode, and responsive service insights.
 
-The planned scope includes scheduled departures, stop search, saved stops, offline schedules, route details, and service insights. Accessibility and on-device location privacy are priorities.
+All routes, stops, times, and metrics come from the retained official feed, currently valid October 26, 2026 through January 3, 2027. Times are scheduled. This app does not provide live vehicle tracking.
+
+## Run locally
+
+Use Node.js 24 or newer.
+
+```sh
+npm ci
+npm run dev
+```
+
+The development server prints its local URL. To test the production app, including offline behavior:
+
+```sh
+npm run build
+npm run preview
+```
+
+Offline saving requires HTTPS or localhost and one successful connected visit. The service worker caches the app shell, bundled fonts, and complete precomputed schedule. It never sends the rider's location to a server. Saved stops and appearance preferences stay in browser storage.
+
+## Validation
+
+```sh
+npm test
+npm run build
+npm run test:e2e
+```
+
+Browser checks use installed Google Chrome locally. CI installs Playwright Chromium. They cover rider flows, day toggles and sorting, accessibility scans, offline reload, dark mode, and narrow-screen reflow. Unit tests cover GTFS service-day arithmetic, Newfoundland daylight saving changes, calendar exceptions, and service metrics.
+
+## Update the schedule
+
+```sh
+npm run data:refresh
+```
+
+Refresh at least weekly, as required by the data provider. Commit `data/google_transit.zip` and `data/source.json`, then rebuild and redeploy. A normal build uses the retained ZIP, so it is reproducible without downloading a new feed. A failed validation stops the build before replacing derived output. See [data sources and metric definitions](docs/DATA.md).
+
+## Stack and layout
+
+React, TypeScript and Vite, with CSS variables implementing the brief's light/dark design tokens. Temporal handles service instants; CSV and ZIP parsing happens at build time.
+
+- `scripts/build-data.mjs`: validated feed conversion and summary metrics.
+- `src/lib/`: shared service-time and metric calculations.
+- `src/App.tsx`: rider screens and local preferences.
+- `src/Insights.tsx`: dashboard, chart, sorting, and data-quality checks.
+- `scripts/sw-template.js`: production offline behavior.
+- `public/data/`: generated JSON, including per-stop files; excluded from Git.
+- `.openai/hosting.json`: private Site identity and static build configuration.
+
+Installability and storage availability depend on the browser. The app reports unavailable persistent storage rather than assuming a save succeeded. A stale feed remains inspectable and displays its age; departure search never invents service beyond calendar validity.
 
 ## Development workflow
 
