@@ -10,6 +10,7 @@ export type Stop = {
 export type Route = { id: string; number: string; name: string };
 export type Entry = {
   time: number;
+  sequence: number;
   trip: string;
   route: string;
   service: string;
@@ -41,7 +42,7 @@ export type Summary = {
   trips: number;
   coverage: number;
   hours: { hour: number; count: number }[];
-  gaps: { stop: string; last: number }[];
+  gaps: { stop: string; last: number; peakOnly: boolean }[];
 };
 export type Schedule = {
   meta: {
@@ -53,7 +54,9 @@ export type Schedule = {
     retrieved: string;
     sha256: string;
     outside: number;
-    duplicateNames: number;
+    unusedStopCount: number;
+    unusedStopIds: string[];
+    stopTimeOrderViolationCount: number;
     maxTime: number;
     chartAfterMidnight: string;
   };

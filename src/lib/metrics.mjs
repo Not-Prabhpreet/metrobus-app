@@ -66,7 +66,10 @@ export function metricsFor(trips, departures, routes, stops, active) {
     if (h >= 5) hours[h - 5].count++;
   }
   const gaps = served
-    .map((s) => ({ stop: s.id, last: Math.max(...s.times) }))
+    .map((s) => {
+      const last = Math.max(...s.times);
+      return { stop: s.id, last, peakOnly: last < 36000 };
+    })
     .filter((s) => s.last < 68400)
     .sort((a, b) => a.last - b.last);
   return {

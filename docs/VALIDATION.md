@@ -2,7 +2,7 @@
 
 Checked locally on November 19, 2026 against the retained official Metrobus GTFS feed.
 
-The finalized production build, all eight unit tests, and all 30 browser checks passed locally. The 30 checks run ten flows in desktop Chromium, Android-style Chromium, and iPhone-style WebKit. GitHub Actions runs the same suite before publication to public GitHub Pages.
+The latest production build, all 15 unit tests, and all 39 browser checks passed locally. The browser checks cover desktop Chromium, Android-style Chromium, and iPhone-style WebKit. GitHub Actions runs the same suite before publication to public GitHub Pages.
 
 - Unit tests: service-day boundaries, 24:00+ times, Newfoundland spring/fall DST, calendar overrides, countdown formatting, coverage boundaries, directional headways, distinct-trip metrics, and service-gap boundaries.
 - Browser checks in all three configurations: stop search, keyboard saving and navigation, persistent saved stops, timetable expansion, route lists and map alternatives, on-device geolocation, offline reload with cached schedule, dashboard day changes, stable sorting, chart data fallback, route pagination, and empty/error states.
@@ -17,3 +17,5 @@ GitHub Pages migration: all nine browser tests passed at both `/` and `/metrobus
 Finalization fixed the Skip to content link, navigation focus timing, and route synchronization during immediate navigation after a reload. The official feed-refresh command was exercised successfully. Weekly Pages runs download and validate the latest feed, retain the source snapshot, and publish only after the full test suite passes. Offline versions hash the generated schedule, so data-only updates also replace the cached schedule.
 
 Physical iPhone/Android home-screen installation and operating-system permission/storage behavior have not been tested on actual hardware. Browser emulation does not replace that final device acceptance check; the steps are in README.md.
+
+The latest update was implemented in the requested order: terminal boardings, Leaflet/OSM map, live home search, SQL quality views, then service-label formatting. Unit cases cover loop versus terminal occurrences, no-pickup stops, SQL unused IDs and backwards/equal/25-hour times, Title Case/acronyms, whole-minute headways and the strict 10 a.m. peak-only boundary. Browser checks cover typing/deleting without Enter, map overlay/markers/attribution, five quality cards and peak-only labels. CI mocks OSM tiles to avoid repeatedly downloading public tiles; the live map is checked separately with actual tiles.

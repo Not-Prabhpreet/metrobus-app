@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
 import { activeServices, serviceInstant } from "../src/lib/time.mjs";
@@ -54,7 +54,9 @@ test("search, save, timetable, route and device persistence", async ({
     ).violations,
   ).toEqual([]);
   await page.locator(".departure-hero .badge-link").click();
-  await expect(page.getByRole("img", { name: /map preview/ })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: /map with stop markers/ }),
+  ).toBeVisible();
   await expect(page.locator(".ordered-stops li").first()).toBeVisible();
   expect(
     (

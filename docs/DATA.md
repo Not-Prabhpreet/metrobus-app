@@ -20,4 +20,10 @@ Thirty-minute coverage includes both boundaries of the 7 a.m. to 7 p.m. window. 
 
 Coordinate checks use a configurable bounding box in `scripts/build-data.mjs`: latitude 47.35–47.75, longitude −52.95–−52.55, covering St. John's, Mount Pearl and Paradise. Duplicate names count every stop sharing its name with another stop ID. Calendar freshness is calculated in the browser, so it stays current between builds.
 
-Maps render the selected trip's actual shape from `shapes.txt` as a local SVG. No map tiles, trackers, or location requests leave the device. The ordered stop list is the primary accessible representation.
+Stop departures exclude the final stop-time occurrence of each trip, even when the feed marks it as pickup-allowed. A loop's initial boarding at the same stop remains eligible. This boarding filter also applies to saved-stop previews, full timetables, coverage and service gaps. Terminal/drop-off stop occurrences still count as trip usage for data quality.
+
+`scripts/etl/views.sql` contains the SQLite ETL views for unused stop IDs and stop-time ordering. `etl_unused_stops` considers every trip and service pattern. `etl_stop_time_order_violations` compares numeric service-day seconds using `LAG`, including arrival versus previous departure and departure versus arrival. Equal timestamps are valid; times must be non-decreasing. An order violation fails the build before publication. These SQL results populate the five-card Data quality section; duplicate stop names are no longer a warning.
+
+Headways retain their computed precision for sorting but display as rounded whole-minute estimates. Headsigns use Title Case while preserving local acronyms. Service gaps whose last boardable departure is strictly before 10 a.m. are tagged “Peak only”.
+
+Maps load Leaflet on the client and display the selected trip's actual shape from `shapes.txt` over OpenStreetMap tiles, with visible attribution. OSM receives the normal tile requests for the route view; rider coordinates are not sent to it. Tiles follow browser HTTP caching and are not bulk-downloaded or stored by the service worker. Offline users retain the route line, markers and ordered stop list; background tiles need connectivity. The ordered list is the accessible interface for selecting stops; map markers are visual location markers.

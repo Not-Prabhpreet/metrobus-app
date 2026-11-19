@@ -1,3 +1,4 @@
+import { headwayLabel } from "./lib/presentation.mjs";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, dayLabels, formatDate, StatusChip } from "./components";
 import { localDate, scheduleClock } from "./lib/time.mjs";
@@ -12,11 +13,8 @@ const sortLabels: Record<SortKey, string> = {
   headway: "Midday headway",
   span: "Service span",
 };
-function minutes(value: number | null) {
-  return value === null
-    ? "Not enough service"
-    : `Every ${Number(value.toFixed(1))} min`;
-}
+const minutes = headwayLabel;
+
 function span(seconds: number) {
   return `${Math.floor(seconds / 3600)} h ${Math.floor((seconds % 3600) / 60)} min`;
 }
@@ -53,7 +51,7 @@ export function Insights({ data, now }: { data: Schedule; now: number }) {
   const sentence =
     maxHeadway < 0
       ? "There are not enough midday departures to compare route frequencies."
-      : `${least.length === 1 ? "Route" : "Routes"} ${new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(least)} ${least.length === 1 ? "runs" : "run"} least often at midday: every ${maxHeadway} minutes.`;
+      : `${least.length === 1 ? "Route" : "Routes"} ${new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(least)} ${least.length === 1 ? "runs" : "run"} least often at midday: about every ${Math.round(maxHeadway)} min.`;
   function changeSort(key: SortKey) {
     if (sort === key) setDescending((v) => !v);
     else {
@@ -442,6 +440,7 @@ function ServiceGaps({ data }: { data: Schedule }) {
             <a href={`#/stop/${gap.stop}`}>
               <strong>{data.stops[gap.stop].name}</strong>
               <span className="caption">Stop #{data.stops[gap.stop].code}</span>
+              {gap.peakOnly && <span className="service-tag">Peak only</span>}
             </a>
             <div>
               <span className="caption">Last bus</span>
@@ -467,7 +466,12 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
       (Date.parse(meta.end) - Date.parse(localDate(now, meta.timezone))) /
         86400000,
     );
-  const checks = [
+  const checks: {
+    title: string;
+    pass: boolean;
+    text: string;
+    unusedIds?: string[];
+  }[] = [
     {
       title: "Required files are present",
       pass: true,
@@ -486,11 +490,19 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
       text: `Feed ends ${formatDate(meta.end)}, ${days >= 0 ? `in ${days} days` : `${Math.abs(days)} days ago`}`,
     },
     {
-      title: "Stop names are unique",
-      pass: meta.duplicateNames === 0,
-      text: meta.duplicateNames
-        ? `${meta.duplicateNames} stops share a name with another stop code`
-        : "Each stop has a unique name",
+      title: "Every stop is used by at least one trip",
+      pass: meta.unusedStopCount === 0,
+      text: meta.unusedStopCount
+        ? `${meta.unusedStopCount} unused stops`
+        : "All stops occur in at least one trip. No unused stop IDs.",
+      unusedIds: meta.unusedStopIds,
+    },
+    {
+      title: "Stop times increase within each trip",
+      pass: meta.stopTimeOrderViolationCount === 0,
+      text: meta.stopTimeOrderViolationCount
+        ? `${meta.stopTimeOrderViolationCount} time-order violations`
+        : "All trips have non-decreasing arrival/departure times. Equal times are allowed.",
     },
   ];
   const passed = checks.filter((c) => c.pass).length;
@@ -498,9 +510,9 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
     <section className="card side-panel">
       <h2>Data quality</h2>
       <p>
-        {passed} of 4 checks pass
-        {passed < 4
-          ? `; ${4 - passed} ${passed === 3 ? "needs" : "need"} a look before the next feed.`
+        {passed} of {checks.length} checks pass
+        {passed < checks.length
+          ? `; ${checks.length - passed} ${checks.length - passed === 1 ? "needs" : "need"} a look before the next feed.`
           : "."}
       </p>
       <ul className="quality-list">
@@ -509,6 +521,18 @@ function DataQuality({ data, now }: { data: Schedule; now: number }) {
             <div>
               <strong>{check.title}</strong>
               <p className="caption">{check.text}</p>
+              {!!check.unusedIds?.length && (
+                <details className="unused-stops">
+                  <summary>Unused stop IDs ({check.unusedIds.length})</summary>
+                  <ul>
+                    {check.unusedIds.map((id) => (
+                      <li key={id}>
+                        <a href={`#/stop/${id}`}>{id}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </div>
             <StatusChip pass={check.pass} />
           </li>

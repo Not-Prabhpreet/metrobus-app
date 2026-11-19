@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test("assets, install manifest and offline cache stay inside the hosting path", async ({
   page,
