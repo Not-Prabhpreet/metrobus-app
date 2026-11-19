@@ -73,7 +73,9 @@ Changes merged into `main` run the Pages workflow: latest-feed download, unit te
 
 The manifest, fonts, schedule fetch and scoped service worker support the repository subdirectory. Local development defaults to `/`. To test the Pages build locally, set `VITE_BASE_PATH=/metrobus-app/` for both `npm run build` and `npm run test:e2e`.
 
-Offline cache versions include the complete generated schedule, so a data-only refresh creates a new cache. Open clients reload their schedule data when a new worker takes control.
+Offline caches use a hash of the final HTML, assets, schedule and worker code. New workers activate immediately, claim open clients and remove old app caches. Open tabs reload the new build automatically while preserving saved stops and the current route. The app checks for updates when focused, brought online or made visible, and every five minutes while visible. HTML uses network-first delivery with an offline cache fallback; only hashed assets and data JSON use cache-first delivery. Worker update checks bypass the HTTP cache.
+
+Route-map stop dots are 10 px across to keep dense downtown routes readable; the full stop list stays below the map.
 
 ## Final phone acceptance check
 

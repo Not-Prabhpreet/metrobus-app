@@ -1,7 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { readFileSync } from "node:fs";
-import { createHash } from "node:crypto";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { serviceWorkerSource } from "./scripts/lib/service-worker.mjs";
 
 let basePath = "/";
 
@@ -14,29 +15,12 @@ export default defineConfig({
       configResolved(config) {
         basePath = config.base;
       },
-      generateBundle(_, bundle) {
-        const scheduleHash = createHash("sha256")
-          .update(readFileSync("public/data/schedule.json"))
-          .digest("hex");
-        const files = [
-          "",
-          "index.html",
-          "data/schedule.json",
-          "icon.svg",
-          "icon-192.png",
-          "icon-512.png",
-          "manifest.webmanifest",
-          ...Object.keys(bundle).filter((f) => !f.endsWith(".map")),
-        ].map((file) => basePath + file);
-        const template = readFileSync("scripts/sw-template.js", "utf8");
-        const version = createHash("sha256")
-          .update(scheduleHash + JSON.stringify(files) + template)
-          .digest("hex")
-          .slice(0, 16);
-        const source = template
-          .replace("__VERSION__", JSON.stringify(version))
-          .replace("__PRECACHE__", JSON.stringify([...new Set(files)]));
-        this.emitFile({ type: "asset", fileName: "sw.js", source });
+      writeBundle(output, bundle) {
+        const directory = output.dir || "dist";
+        writeFileSync(
+          join(directory, "sw.js"),
+          serviceWorkerSource(directory, basePath, Object.keys(bundle)),
+        );
       },
     },
   ],
