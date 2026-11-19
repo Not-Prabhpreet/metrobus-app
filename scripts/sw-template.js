@@ -27,21 +27,6 @@ self.addEventListener("activate", (event) => {
       );
       await Promise.all(oldCaches.map((name) => caches.delete(name)));
       await self.clients.claim();
-      // Existing tabs may still run the previous JS, including clients that
-      // predate the app's update handler. Reload once per new cache version.
-      if (oldCaches.length) {
-        const windows = await self.clients.matchAll({ type: "window" });
-        for (const client of windows) {
-          if (
-            new URL(client.url).origin === SCOPE.origin &&
-            new URL(client.url).pathname.startsWith(SCOPE.pathname)
-          ) {
-            // Start navigation without waiting for it inside activation: its
-            // fetch may itself wait for this activate event to finish.
-            client.navigate(client.url).catch(() => null);
-          }
-        }
-      }
     })(),
   );
 });
