@@ -2,6 +2,8 @@
 
 Checked locally on November 19, 2026 against the retained official Metrobus GTFS feed.
 
+The production build, all eight unit tests, and all eight browser tests passed locally. GitHub Actions also passed the implementation checks. The private hosted app was published after owner approval.
+
 - Unit tests: service-day boundaries, 24:00+ times, Newfoundland spring/fall DST, calendar overrides, countdown formatting, coverage boundaries, directional headways, distinct-trip metrics, and service-gap boundaries.
 - Chrome browser checks: stop search, keyboard saving and navigation, persistent saved stops, timetable expansion, route lists and map alternatives, on-device geolocation, offline reload with cached schedule, dashboard day changes, stable sorting, chart data fallback, route pagination, and empty/error states.
 - Automated accessibility scans: Nearby, Search, Saved, Stop detail, Route detail, and desktop/mobile Insights. WCAG 2 A/AA, 2.1 AA, and 2.2 AA rules enabled. A passing automated scan is not a full WCAG conformance certification.
