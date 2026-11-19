@@ -202,6 +202,7 @@ export function SearchField({
         placeholder="Stop name, number or route"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onInput={(e) => onChange(e.currentTarget.value)}
         autoFocus={autoFocus}
       />
     </div>

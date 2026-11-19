@@ -528,7 +528,7 @@ function SearchPage(props: Shared) {
   );
 }
 function SearchResults({ query, ...props }: Shared & { query: string }) {
-  const [debounced, setDebounced] = useState(query),
+  const [debounced, setDebounced] = useState(""),
     [limit, setLimit] = useState(20);
   useEffect(() => {
     const timer = setTimeout(() => {
