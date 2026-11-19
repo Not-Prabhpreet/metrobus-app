@@ -1,3 +1,4 @@
+import { headwayLabel } from "./lib/presentation.mjs";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, dayLabels, formatDate, StatusChip } from "./components";
 import { localDate, scheduleClock } from "./lib/time.mjs";
@@ -12,11 +13,8 @@ const sortLabels: Record<SortKey, string> = {
   headway: "Midday headway",
   span: "Service span",
 };
-function minutes(value: number | null) {
-  return value === null
-    ? "Not enough service"
-    : `Every ${Number(value.toFixed(1))} min`;
-}
+const minutes = headwayLabel;
+
 function span(seconds: number) {
   return `${Math.floor(seconds / 3600)} h ${Math.floor((seconds % 3600) / 60)} min`;
 }
@@ -53,7 +51,7 @@ export function Insights({ data, now }: { data: Schedule; now: number }) {
   const sentence =
     maxHeadway < 0
       ? "There are not enough midday departures to compare route frequencies."
-      : `${least.length === 1 ? "Route" : "Routes"} ${new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(least)} ${least.length === 1 ? "runs" : "run"} least often at midday: every ${maxHeadway} minutes.`;
+      : `${least.length === 1 ? "Route" : "Routes"} ${new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(least)} ${least.length === 1 ? "runs" : "run"} least often at midday: about every ${Math.round(maxHeadway)} min.`;
   function changeSort(key: SortKey) {
     if (sort === key) setDescending((v) => !v);
     else {
@@ -442,6 +440,7 @@ function ServiceGaps({ data }: { data: Schedule }) {
             <a href={`#/stop/${gap.stop}`}>
               <strong>{data.stops[gap.stop].name}</strong>
               <span className="caption">Stop #{data.stops[gap.stop].code}</span>
+              {gap.peakOnly && <span className="service-tag">Peak only</span>}
             </a>
             <div>
               <span className="caption">Last bus</span>

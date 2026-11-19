@@ -109,6 +109,6 @@ describe("service metrics", () => {
     expect(m.trips).toBe(1);
     expect(m.stops).toBe(2);
     expect(m.hours.at(-1)?.count).toBe(1);
-    expect(m.gaps).toEqual([{ stop: "b", last: 68000 }]);
+    expect(m.gaps).toEqual([{ stop: "b", last: 68000, peakOnly: false }]);
   });
 });

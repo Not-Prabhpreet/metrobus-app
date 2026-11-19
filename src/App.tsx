@@ -39,6 +39,7 @@ import {
 import type { Departure, Schedule, Stop, Trip } from "./types";
 import { Insights } from "./Insights";
 import { RouteMap } from "./RouteMap";
+import { headwayLabel } from "./lib/presentation.mjs";
 
 type Position = { lat: number; lon: number };
 function readSaved(): string[] {
@@ -873,12 +874,7 @@ function RouteDetail({ id, ...props }: Shared & { id: string }) {
         {[
           ["First bus", metric ? scheduleClock(metric.first) : "Not available"],
           ["Last bus", metric ? scheduleClock(metric.last) : "Not available"],
-          [
-            "Midday",
-            metric?.headway
-              ? `Every ${Number(metric.headway.toFixed(1))} min`
-              : "Not enough service",
-          ],
+          ["Midday", headwayLabel(metric?.headway ?? null)],
         ].map(([label, value]) => (
           <div className="card" key={label}>
             <dt>{label}</dt>

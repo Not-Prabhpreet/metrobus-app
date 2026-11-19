@@ -1558,3 +1558,38 @@ select {
   border: 4px solid var(--ink);
   box-shadow: 0 0 0 3px var(--surface);
 }
+
+.service-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--accent-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.unused-stops summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--accent-ink);
+}
+.unused-stops ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+.quality-list .unused-stops li {
+  display: block;
+  border: 0;
+  padding: 0;
+}
+.unused-stops a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}

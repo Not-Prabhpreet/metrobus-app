@@ -8,6 +8,8 @@ Primary hosting is [GitHub Pages](https://not-prabhpreet.github.io/metrobus-app/
 
 The first implementation includes stop search, on-device nearby stops, saved stops, scheduled departure countdowns, full timetables, route directions and shape previews, offline PWA caching, dark mode, and responsive service insights.
 
+Stop departures now exclude terminating arrivals. The route page uses a client-side Leaflet map with OpenStreetMap tiles, the actual route shape and stop markers, with the accessible stop list below. Background tiles need an internet connection; route/stop data stays available offline. Home search filters while typing with a 150 ms debounce. SQL ETL views compute unused-stop and stop-time-order quality checks. Headways display whole-minute estimates, headsigns use Title Case, and early-ending service is marked “Peak only”.
+
 All routes, stops, times, and metrics come from the retained official feed, currently valid October 26, 2026 through January 3, 2027. Times are scheduled. This app does not provide live vehicle tracking.
 
 ## Run locally
@@ -53,9 +55,11 @@ For a manual refresh, run the command above, commit `data/google_transit.zip` an
 React, TypeScript and Vite, with CSS variables implementing the brief's light/dark design tokens. Temporal handles service instants; CSV and ZIP parsing happens at build time.
 
 - `scripts/build-data.mjs`: validated feed conversion and summary metrics.
+- `scripts/etl/views.sql`: SQLite views for stop usage and time-order quality checks.
 - `src/lib/`: shared service-time and metric calculations.
 - `src/App.tsx`: rider screens and local preferences.
 - `src/Insights.tsx`: dashboard, chart, sorting, and data-quality checks.
+- `src/RouteMap.tsx`: client-only Leaflet map and visible OSM attribution.
 - `scripts/sw-template.js`: production offline behavior.
 - `public/data/`: generated JSON, including per-stop files; excluded from Git.
 - `.github/workflows/pages.yml`: tested public deployment to GitHub Pages.

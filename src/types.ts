@@ -42,7 +42,7 @@ export type Summary = {
   trips: number;
   coverage: number;
   hours: { hour: number; count: number }[];
-  gaps: { stop: string; last: number }[];
+  gaps: { stop: string; last: number; peakOnly: boolean }[];
 };
 export type Schedule = {
   meta: {

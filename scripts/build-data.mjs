@@ -21,6 +21,7 @@ import {
 import { metricsFor } from "../src/lib/metrics.mjs";
 import { boardingDepartures } from "./lib/boarding.mjs";
 import { evaluateQuality } from "./lib/quality.mjs";
+import { titleCaseHeadsign } from "../src/lib/presentation.mjs";
 
 const source = "https://www.metrobustransit.ca/google/google_transit.zip";
 const root = new URL("../", import.meta.url);
@@ -124,10 +125,11 @@ try {
         id: t.trip_id,
         route: t.route_id,
         service: t.service_id,
-        headsign:
+        headsign: titleCaseHeadsign(
           t.trip_headsign ||
-          routes.find((r) => r.id === t.route_id)?.name ||
-          "Route",
+            routes.find((r) => r.id === t.route_id)?.name ||
+            "Route",
+        ),
         direction: t.direction_id || "0",
         shape: t.shape_id,
         stops: [],
@@ -167,7 +169,9 @@ try {
       time,
       sequence: Number(row.stop_sequence),
       pickup: row.pickup_type !== "1",
-      headsign: row.stop_headsign || trip.headsign,
+      headsign: row.stop_headsign
+        ? titleCaseHeadsign(row.stop_headsign)
+        : trip.headsign,
     });
     if (!stops[row.stop_id].routes.includes(trip.route))
       stops[row.stop_id].routes.push(trip.route);
