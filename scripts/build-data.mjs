@@ -262,7 +262,8 @@ try {
   let retrieved;
   try {
     const prior = JSON.parse(await readFile(path("data/source.json"), "utf8"));
-    if (prior.sha256 === hash) retrieved = prior.retrieved;
+    if (!process.argv.includes("--download") && prior.sha256 === hash)
+      retrieved = prior.retrieved;
   } catch {}
   retrieved ??= new Date().toISOString();
   const meta = {

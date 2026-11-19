@@ -56,8 +56,11 @@ test("mobile cards, dark mode, narrow reflow and large text remain accessible", 
   await page.goto("./#/insights");
   await expect(page.locator(".route-metric-card")).toHaveCount(4);
   await page.getByLabel("Sort by", { exact: true }).selectOption("number-asc");
+  const firstRoute = [...data.summary.weekday.routes].sort((a, b) =>
+    a.number.localeCompare(b.number, undefined, { numeric: true }),
+  )[0];
   await expect(page.locator(".route-metric-card").first()).toContainText(
-    "Village-Institutes",
+    firstRoute.name,
   );
   await page.screenshot({
     path: "test-results/insights-mobile.png",

@@ -13,6 +13,10 @@ test("keyboard skip link focuses content without changing the active screen", as
     "route/1",
   ]) {
     await page.goto(`./#/${path}`);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).not.toHaveText(
+      "Loading schedule",
+    );
     await expect(page.locator(".loading")).toHaveCount(0);
     const url = page.url();
     const heading = await page.getByRole("heading", { level: 1 }).textContent();
