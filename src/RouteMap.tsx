@@ -47,8 +47,8 @@ export function RouteMap({
           icon: L.divIcon({
             className: `route-stop-marker${nearestStop ? " nearest-marker" : ""}`,
             html: '<span class="route-stop-dot"></span>',
-            iconSize: [44, 44],
-            iconAnchor: [22, 22],
+            iconSize: [10, 10],
+            iconAnchor: [5, 5],
           }),
           title: `${index + 1}. ${stop.name}${nearestStop ? " · Nearest to you" : ""}`,
           alt: `Stop #${stop.code}: ${stop.name}`,

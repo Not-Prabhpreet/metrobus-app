@@ -27,5 +27,13 @@ test("Leaflet shows the route, stop markers and visible OpenStreetMap attributio
     await page.locator(".ordered-stops li").count(),
   );
   await expect(page.locator(".leaflet-marker-icon[tabindex]")).toHaveCount(0);
+  await expect(page.locator(".route-stop-dot").first()).toHaveCSS(
+    "width",
+    "10px",
+  );
+  await expect(page.locator(".route-stop-dot").first()).toHaveCSS(
+    "height",
+    "10px",
+  );
   await expect(page.locator(".ordered-stops")).toBeVisible();
 });
