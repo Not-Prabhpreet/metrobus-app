@@ -10,6 +10,7 @@ export type Stop = {
 export type Route = { id: string; number: string; name: string };
 export type Entry = {
   time: number;
+  sequence: number;
   trip: string;
   route: string;
   service: string;

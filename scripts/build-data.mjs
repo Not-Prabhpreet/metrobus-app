@@ -19,6 +19,7 @@ import {
   parseTime,
 } from "../src/lib/time.mjs";
 import { metricsFor } from "../src/lib/metrics.mjs";
+import { boardingDepartures } from "./lib/boarding.mjs";
 
 const source = "https://www.metrobustransit.ca/google/google_transit.zip";
 const root = new URL("../", import.meta.url);
@@ -132,9 +133,6 @@ try {
       },
     ]),
   );
-  const departures = Object.fromEntries(
-    Object.keys(stops).map((id) => [id, []]),
-  );
   for (const row of csv("stop_times", [
     "trip_id",
     "stop_id",
@@ -159,16 +157,8 @@ try {
       time,
       sequence: Number(row.stop_sequence),
       pickup: row.pickup_type !== "1",
+      headsign: row.stop_headsign || trip.headsign,
     });
-    if (row.pickup_type !== "1")
-      departures[row.stop_id].push({
-        time,
-        trip: trip.id,
-        route: trip.route,
-        service: trip.service,
-        headsign: row.stop_headsign || trip.headsign,
-        direction: trip.direction,
-      });
     if (!stops[row.stop_id].routes.includes(trip.route))
       stops[row.stop_id].routes.push(trip.route);
   }
@@ -183,6 +173,7 @@ try {
       if (t.stops[i].time < t.stops[i - 1].time)
         throw new Error(`stop_times.txt: times go backwards in trip ${t.id}`);
   }
+  const departures = boardingDepartures(trips, Object.keys(stops));
   const shapePoints = {};
   for (const row of csv("shapes"))
     (shapePoints[row.shape_id] ??= []).push([
