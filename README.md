@@ -4,6 +4,8 @@ A mobile-first rider app and service planning dashboard for Metrobus in St. John
 
 ## Project status
 
+Primary hosting is [GitHub Pages](https://not-prabhpreet.github.io/metrobus-app/), which opens without signing in.
+
 The first implementation includes stop search, on-device nearby stops, saved stops, scheduled departure countdowns, full timetables, route directions and shape previews, offline PWA caching, dark mode, and responsive service insights.
 
 All routes, stops, times, and metrics come from the retained official feed, currently valid October 26, 2026 through January 3, 2027. Times are scheduled. This app does not provide live vehicle tracking.
@@ -54,9 +56,16 @@ React, TypeScript and Vite, with CSS variables implementing the brief's light/da
 - `src/Insights.tsx`: dashboard, chart, sorting, and data-quality checks.
 - `scripts/sw-template.js`: production offline behavior.
 - `public/data/`: generated JSON, including per-stop files; excluded from Git.
-- `.openai/hosting.json`: private Site identity and static build configuration.
+- `.github/workflows/pages.yml`: tested public deployment to GitHub Pages.
+- `.openai/hosting.json`: retained metadata for the earlier private host; GitHub Pages is the primary deployment destination.
 
 Installability and storage availability depend on the browser. The app reports unavailable persistent storage rather than assuming a save succeeded. A stale feed remains inspectable and displays its age; departure search never invents service beyond calendar validity.
+
+## GitHub Pages deployment
+
+Changes merged into `main` run the Pages workflow: unit tests, a production build using `VITE_BASE_PATH=/metrobus-app/`, browser checks at that same path, and deployment of `dist/`. The workflow can also be run manually through GitHub Actions. The app uses hash routes, so stop and route links work without server rewrite rules.
+
+The manifest, fonts, schedule fetch and scoped service worker support the repository subdirectory. Local development defaults to `/`. To test the Pages build locally, set `VITE_BASE_PATH=/metrobus-app/` for both `npm run build` and `npm run test:e2e`.
 
 ## Development workflow
 

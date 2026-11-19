@@ -5,7 +5,7 @@ test("top-level screens have accessible landmarks and empty states", async ({
   page,
 }) => {
   for (const path of ["nearby", "search", "saved"]) {
-    await page.goto(`/#/${path}`);
+    await page.goto(`./#/${path}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
     await expect(page.locator(".loading")).toHaveCount(0);
     expect(
@@ -30,7 +30,7 @@ test("denied location and distant locations keep search available", async ({
       },
     });
   });
-  await page.goto("/");
+  await page.goto("./");
   await page.getByRole("button", { name: "Use my location" }).click();
   await expect(
     page.getByText(/Location is off. Search for a stop instead./),
@@ -43,7 +43,7 @@ test("failed schedule fetch gives a retry and the no-cache offline message", asy
   context,
 }) => {
   await page.route("**/data/schedule.json", (route) => route.abort());
-  await page.goto("/");
+  await page.goto("./");
   await expect(
     page.getByRole("heading", { name: "Schedule unavailable" }),
   ).toBeVisible();

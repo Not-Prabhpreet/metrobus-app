@@ -3,25 +3,29 @@ import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 
+let basePath = "/";
+
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || "/",
   plugins: [
     react(),
     {
       name: "offline-schedule",
+      configResolved(config) {
+        basePath = config.base;
+      },
       generateBundle(_, bundle) {
         const meta = JSON.parse(readFileSync("data/source.json", "utf8"));
         const files = [
-          "/",
-          "/index.html",
-          "/data/schedule.json",
-          "/icon.svg",
-          "/icon-192.png",
-          "/icon-512.png",
-          "/manifest.webmanifest",
-          ...Object.keys(bundle)
-            .filter((f) => !f.endsWith(".map"))
-            .map((f) => "/" + f),
-        ];
+          "",
+          "index.html",
+          "data/schedule.json",
+          "icon.svg",
+          "icon-192.png",
+          "icon-512.png",
+          "manifest.webmanifest",
+          ...Object.keys(bundle).filter((f) => !f.endsWith(".map")),
+        ].map((file) => basePath + file);
         const template = readFileSync("scripts/sw-template.js", "utf8");
         const version = createHash("sha256")
           .update(meta.sha256 + JSON.stringify(files) + template)

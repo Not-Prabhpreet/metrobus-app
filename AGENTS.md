@@ -6,6 +6,7 @@
 - Make meaningful commits and push the working branch regularly while building, at logical checkpoints.
 - Keep `main` stable. Do not force-push or overwrite unrelated work.
 - Keep credentials, local configuration, and the local PDF design brief out of the public repository.
+- The app's primary host is public GitHub Pages. Deploy through `.github/workflows/pages.yml`; use `/metrobus-app/` as the build base. Do not publish updates to Sites unless the owner requests it.
 
 ## Current stage
 

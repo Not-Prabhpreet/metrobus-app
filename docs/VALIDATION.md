@@ -11,3 +11,5 @@ The production build, all eight unit tests, and all eight browser tests passed l
 - Lighthouse local production audit: performance **97**, accessibility **100**, best practices **100**. Scores vary by device, browser, hosting, and network. The report identified a loading-state layout shift and unused JavaScript as remaining optimization opportunities.
 
 The rider app and dashboard were visually reviewed against the PDF screenshots. Invented screenshot values were replaced with actual feed values; first-run empty saved stops and explicit location permission replace the populated mock's assumed user state.
+
+GitHub Pages migration: all nine browser tests passed at both `/` and `/metrobus-app/`, including reload without network; all eight unit tests also passed. A hosting test checks asset fetches, manifest icon/start/scope paths, worker registration scope, and cached URLs. The primary deployment is public and requires no account login.
